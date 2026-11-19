@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Buddy</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+    <div class="chat-container">
+
+        <h1>💬 Chat Buddy</h1>
+        <p>Your friendly chatting space!</p>
+
+        <div class="chat-box" id="chat-box">
+            <div class="message received">
+                Hello! Welcome to Chat Buddy 😊
+            </div>
+        </div>
+
+        <div class="message-input">
+            <input type="text" id="message"
+                   placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const input = document.getElementById("message");
+            const chatBox = document.getElementById("chat-box");
+            const message = input.value.trim();
+
+            if (!message) return;
+
+            const userMessage = document.createElement("div");
+            userMessage.className = "message sent";
+            userMessage.textContent = message;
+            chatBox.appendChild(userMessage);
+
+            input.value = "";
+
+            try {
+                const response = await fetch("/send", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({message: message})
+                });
+
+                const data = await response.json();
+
+                const botMessage = document.createElement("div");
+                botMessage.className = "message received";
+                botMessage.textContent = data.reply;
+                chatBox.appendChild(botMessage);
+
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                console.error("Error:", error);
+            }
+        }
+
+        document.getElementById("message")
+            .addEventListener("keypress", function(event) {
+                if (event.key === "Enter") {
+                    sendMessage();
+                }
+            });
+    </script>
+
+</body>
+</html>
